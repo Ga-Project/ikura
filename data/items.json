@@ -1,0 +1,444 @@
+{
+  "_provenance": "価格は総務省『小売物価統計調査』等の公的統計を基に編集部が独自に概算・整理した参考値。地域・時期・店舗により実際の価格は変動する。商標・ブランドは用いず一般名詞のみ。",
+  "_unit_currency": "JPY",
+  "items": [
+    { "name": "食パン", "unit": "1斤", "price": 170, "category": "食品" },
+    { "name": "牛乳", "unit": "1L", "price": 230, "category": "食品" },
+    { "name": "鶏卵", "unit": "10個", "price": 280, "category": "食品" },
+    {
+      "name": "精米（コシヒカリ以外の一般米）",
+      "unit": "5kg",
+      "price": 2400,
+      "category": "食品"
+    },
+    { "name": "バナナ", "unit": "1房", "price": 250, "category": "食品" },
+    { "name": "トマト", "unit": "1kg", "price": 700, "category": "食品" },
+    { "name": "キャベツ", "unit": "1玉", "price": 200, "category": "食品" },
+    { "name": "じゃがいも", "unit": "1kg", "price": 400, "category": "食品" },
+    { "name": "たまねぎ", "unit": "1kg", "price": 350, "category": "食品" },
+    { "name": "にんじん", "unit": "1kg", "price": 400, "category": "食品" },
+    { "name": "木綿豆腐", "unit": "1丁", "price": 90, "category": "食品" },
+    { "name": "納豆", "unit": "3パック", "price": 110, "category": "食品" },
+    { "name": "こいくち醤油", "unit": "1L", "price": 350, "category": "食品" },
+    { "name": "マヨネーズ", "unit": "500g", "price": 350, "category": "食品" },
+    { "name": "サラダ油", "unit": "1L", "price": 400, "category": "食品" },
+    { "name": "上白糖", "unit": "1kg", "price": 250, "category": "食品" },
+    { "name": "食塩", "unit": "1kg", "price": 120, "category": "食品" },
+    {
+      "name": "小麦粉（薄力）",
+      "unit": "1kg",
+      "price": 300,
+      "category": "食品"
+    },
+    {
+      "name": "インスタントコーヒー",
+      "unit": "瓶1個",
+      "price": 700,
+      "category": "食品"
+    },
+    {
+      "name": "緑茶飲料",
+      "unit": "ペット500ml",
+      "price": 140,
+      "category": "食品"
+    },
+    {
+      "name": "国産牛肉（もも）",
+      "unit": "100g",
+      "price": 500,
+      "category": "食品"
+    },
+    {
+      "name": "豚肉（バラ）",
+      "unit": "100g",
+      "price": 200,
+      "category": "食品"
+    },
+    { "name": "鶏むね肉", "unit": "100g", "price": 80, "category": "食品" },
+    { "name": "塩さけ", "unit": "1切れ", "price": 250, "category": "食品" },
+    {
+      "name": "プレーンヨーグルト",
+      "unit": "400g",
+      "price": 180,
+      "category": "食品"
+    },
+    {
+      "name": "スライスチーズ",
+      "unit": "7枚入",
+      "price": 250,
+      "category": "食品"
+    },
+    { "name": "カップアイス", "unit": "1個", "price": 150, "category": "食品" },
+    {
+      "name": "板チョコレート",
+      "unit": "1枚",
+      "price": 130,
+      "category": "食品"
+    },
+    {
+      "name": "ポテトチップス",
+      "unit": "1袋",
+      "price": 160,
+      "category": "食品"
+    },
+    { "name": "カップめん", "unit": "1個", "price": 200, "category": "食品" },
+    {
+      "name": "レトルトカレー",
+      "unit": "1食",
+      "price": 180,
+      "category": "食品"
+    },
+    { "name": "米みそ", "unit": "750g", "price": 350, "category": "食品" },
+    { "name": "りんご", "unit": "1個", "price": 150, "category": "食品" },
+    { "name": "温州みかん", "unit": "1kg", "price": 600, "category": "食品" },
+    { "name": "レタス", "unit": "1玉", "price": 200, "category": "食品" },
+    { "name": "きゅうり", "unit": "1本", "price": 60, "category": "食品" },
+    { "name": "だいこん", "unit": "1本", "price": 180, "category": "食品" },
+    { "name": "ほうれんそう", "unit": "1束", "price": 200, "category": "食品" },
+    {
+      "name": "食パン用ジャム",
+      "unit": "1瓶",
+      "price": 300,
+      "category": "食品"
+    },
+    { "name": "冷凍餃子", "unit": "1袋", "price": 250, "category": "食品" },
+    {
+      "name": "食用のり（焼きのり）",
+      "unit": "10枚",
+      "price": 300,
+      "category": "食品"
+    },
+    { "name": "はちみつ", "unit": "1本", "price": 700, "category": "食品" },
+    {
+      "name": "かけそば（そば店）",
+      "unit": "1杯",
+      "price": 450,
+      "category": "外食"
+    },
+    { "name": "牛丼（並盛）", "unit": "1杯", "price": 450, "category": "外食" },
+    {
+      "name": "中華そば（ラーメン店）",
+      "unit": "1杯",
+      "price": 800,
+      "category": "外食"
+    },
+    {
+      "name": "コーヒー（喫茶店）",
+      "unit": "1杯",
+      "price": 450,
+      "category": "外食"
+    },
+    {
+      "name": "ハンバーガー（単品）",
+      "unit": "1個",
+      "price": 200,
+      "category": "外食"
+    },
+    { "name": "回転ずし", "unit": "1皿", "price": 130, "category": "外食" },
+    {
+      "name": "生ビール（居酒屋・中）",
+      "unit": "1杯",
+      "price": 550,
+      "category": "外食"
+    },
+    {
+      "name": "缶コーヒー（自販機）",
+      "unit": "1本",
+      "price": 130,
+      "category": "外食"
+    },
+    {
+      "name": "ミネラルウォーター",
+      "unit": "ペット500ml",
+      "price": 110,
+      "category": "外食"
+    },
+    {
+      "name": "炭酸飲料（コーラ類）",
+      "unit": "ペット500ml",
+      "price": 160,
+      "category": "外食"
+    },
+    {
+      "name": "テイクアウトのり弁当",
+      "unit": "1食",
+      "price": 450,
+      "category": "外食"
+    },
+    {
+      "name": "トイレットペーパー",
+      "unit": "12ロール",
+      "price": 400,
+      "category": "日用品"
+    },
+    {
+      "name": "ティッシュペーパー",
+      "unit": "5箱",
+      "price": 350,
+      "category": "日用品"
+    },
+    { "name": "衣料用洗剤", "unit": "1本", "price": 350, "category": "日用品" },
+    { "name": "シャンプー", "unit": "1本", "price": 600, "category": "日用品" },
+    {
+      "name": "練り歯みがき",
+      "unit": "1本",
+      "price": 250,
+      "category": "日用品"
+    },
+    {
+      "name": "浴用石けん",
+      "unit": "3個入",
+      "price": 200,
+      "category": "日用品"
+    },
+    {
+      "name": "食品用ラップ",
+      "unit": "1本",
+      "price": 200,
+      "category": "日用品"
+    },
+    {
+      "name": "乾電池（単3）",
+      "unit": "4本",
+      "price": 350,
+      "category": "日用品"
+    },
+    {
+      "name": "ごみ袋（45L）",
+      "unit": "10枚",
+      "price": 250,
+      "category": "日用品"
+    },
+    { "name": "ビニール傘", "unit": "1本", "price": 550, "category": "日用品" },
+    {
+      "name": "マスク（不織布）",
+      "unit": "30枚",
+      "price": 400,
+      "category": "日用品"
+    },
+    { "name": "台所用洗剤", "unit": "1本", "price": 180, "category": "日用品" },
+    {
+      "name": "アルミホイル",
+      "unit": "1本",
+      "price": 180,
+      "category": "日用品"
+    },
+    {
+      "name": "使い捨てカイロ",
+      "unit": "10個",
+      "price": 350,
+      "category": "日用品"
+    },
+    { "name": "絆創膏", "unit": "1箱", "price": 250, "category": "日用品" },
+    {
+      "name": "路線バス（初乗り）",
+      "unit": "1回",
+      "price": 220,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "タクシー（初乗り）",
+      "unit": "1回",
+      "price": 500,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "私鉄電車（初乗り）",
+      "unit": "1回",
+      "price": 150,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "レギュラーガソリン",
+      "unit": "1L",
+      "price": 175,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "灯油",
+      "unit": "1L",
+      "price": 115,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "銭湯（大人入浴料）",
+      "unit": "1回",
+      "price": 520,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "理容カット",
+      "unit": "1回",
+      "price": 4000,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "ワイシャツのクリーニング",
+      "unit": "1枚",
+      "price": 220,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "宅配便（60サイズ・県内）",
+      "unit": "1個",
+      "price": 900,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "郵便はがき",
+      "unit": "1枚",
+      "price": 85,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "定形郵便（25gまで）",
+      "unit": "1通",
+      "price": 110,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "コインランドリー乾燥機",
+      "unit": "1回",
+      "price": 200,
+      "category": "交通・サービス"
+    },
+    {
+      "name": "コインパーキング",
+      "unit": "60分",
+      "price": 300,
+      "category": "交通・サービス"
+    },
+    { "name": "文庫本", "unit": "1冊", "price": 750, "category": "娯楽・文具" },
+    { "name": "週刊誌", "unit": "1冊", "price": 450, "category": "娯楽・文具" },
+    {
+      "name": "新聞（朝夕刊・1か月）",
+      "unit": "1か月",
+      "price": 4400,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "映画館（一般料金）",
+      "unit": "1回",
+      "price": 1900,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "大学ノート",
+      "unit": "1冊",
+      "price": 150,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "ボールペン",
+      "unit": "1本",
+      "price": 120,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "カラオケ（平日日中・1時間）",
+      "unit": "1時間",
+      "price": 350,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "日帰り温泉（入浴のみ）",
+      "unit": "1回",
+      "price": 800,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "花束（供花・小）",
+      "unit": "1束",
+      "price": 2000,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "コピー用紙（A4）",
+      "unit": "500枚",
+      "price": 500,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "乾電池（単4）",
+      "unit": "4本",
+      "price": 350,
+      "category": "日用品"
+    },
+    {
+      "name": "スポーツドリンク",
+      "unit": "ペット500ml",
+      "price": 140,
+      "category": "外食"
+    },
+    { "name": "菓子パン", "unit": "1個", "price": 150, "category": "食品" },
+    { "name": "おにぎり", "unit": "1個", "price": 150, "category": "食品" },
+    {
+      "name": "サンドイッチ",
+      "unit": "1パック",
+      "price": 300,
+      "category": "食品"
+    },
+    {
+      "name": "からあげ弁当（総菜）",
+      "unit": "1食",
+      "price": 500,
+      "category": "外食"
+    },
+    {
+      "name": "アイスコーヒー（カフェ・M）",
+      "unit": "1杯",
+      "price": 400,
+      "category": "外食"
+    },
+    { "name": "ドーナツ", "unit": "1個", "price": 160, "category": "外食" },
+    {
+      "name": "食器用スポンジ",
+      "unit": "3個",
+      "price": 200,
+      "category": "日用品"
+    },
+    { "name": "綿棒", "unit": "200本", "price": 150, "category": "日用品" },
+    { "name": "洗濯ネット", "unit": "1枚", "price": 200, "category": "日用品" },
+    {
+      "name": "電球形ランプ",
+      "unit": "1個",
+      "price": 700,
+      "category": "日用品"
+    },
+    {
+      "name": "使い切りライター",
+      "unit": "1本",
+      "price": 100,
+      "category": "日用品"
+    },
+    {
+      "name": "画びょう",
+      "unit": "1箱",
+      "price": 120,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "封筒（長形）",
+      "unit": "20枚",
+      "price": 200,
+      "category": "娯楽・文具"
+    },
+    {
+      "name": "カット野菜（サラダ）",
+      "unit": "1袋",
+      "price": 130,
+      "category": "食品"
+    },
+    {
+      "name": "ミックスナッツ",
+      "unit": "1袋",
+      "price": 500,
+      "category": "食品"
+    },
+    { "name": "冷凍うどん", "unit": "5食", "price": 300, "category": "食品" },
+    { "name": "ロールケーキ", "unit": "1本", "price": 400, "category": "食品" },
+    { "name": "せんべい", "unit": "1袋", "price": 250, "category": "食品" },
+    { "name": "麦茶パック", "unit": "1箱", "price": 300, "category": "食品" },
+    { "name": "はぶらし", "unit": "1本", "price": 200, "category": "日用品" }
+  ]
+}

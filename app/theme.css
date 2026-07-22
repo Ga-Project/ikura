@@ -1,0 +1,3 @@
+/* イクラ？ — テーマ層は globals.css に統合済み（デザインシステム「ねだんゲージ」）。
+ * 配色トークンは globals.css の :root / [data-theme] を正とする。
+ * このファイルは layout.tsx の import 互換のため残す（意図的に空）。 */
