@@ -79,6 +79,36 @@ test("winRate: 勝率は 0..100 の整数", () => {
   assert.equal(winRate(s), 50);
 });
 
+test("winRate: 端数は四捨五入される（1勝3プレイ=33%）", () => {
+  let s = emptyStats();
+  s = recordGame(s, { date: "d1", won: true, tries: 1, currentStreak: 1 });
+  s = recordGame(s, { date: "d2", won: false, tries: 6, currentStreak: 0 });
+  s = recordGame(s, { date: "d3", won: false, tries: 6, currentStreak: 0 });
+  assert.equal(winRate(s), 33); // 33.33.. → 33
+});
+
+test("recordGame: MAX_TRIES 回ちょうどの的中は最終バケットに入る", () => {
+  let s = emptyStats();
+  s = recordGame(s, {
+    date: "d1",
+    won: true,
+    tries: MAX_TRIES,
+    currentStreak: 1,
+  });
+  assert.equal(s.dist[MAX_TRIES - 1], 1);
+  assert.equal(
+    s.dist.slice(0, MAX_TRIES - 1).reduce((a, b) => a + b, 0),
+    0,
+  );
+});
+
+test("normalizeStats: wins は played を超えないようクランプ", () => {
+  const n = normalizeStats({ played: 2, wins: 99, dist: [], lastDate: "d" });
+  assert.equal(n.played, 2);
+  assert.equal(n.wins, 2); // 99 → played で頭打ち
+  assert.equal(winRate(n), 100); // 100% 超にならない
+});
+
 test("maxDist: 全ゼロでも 0 除算回避に 1 を返す", () => {
   assert.equal(maxDist(emptyStats()), 1);
   let s = emptyStats();

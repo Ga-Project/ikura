@@ -109,6 +109,17 @@ export default function Home() {
     return () => clearInterval(t);
   }, [state.status]);
 
+  // 戦績が変わるたびに端末内へ保存（純粋 updater から副作用を切り離す）。
+  // played=0 の初期状態では書かない。破損データはマウント時の正規化がここで自己修復される。
+  useEffect(() => {
+    if (stats.played <= 0) return;
+    try {
+      localStorage.setItem(`${STORE_PREFIX}:stats`, JSON.stringify(stats));
+    } catch {
+      /* 保存不可でも表示は継続 */
+    }
+  }, [stats]);
+
   const persist = useCallback((p: Puzzle, s: GameState) => {
     try {
       localStorage.setItem(
@@ -124,46 +135,41 @@ export default function Home() {
     (p: Puzzle, won: boolean, tries: number) => {
       if (finalizedRef.current) return;
       finalizedRef.current = true;
-      let count = 0;
+
+      // 連勝を計算。streak キーだけが破損しても勝ちを count=1 として扱えるよう
+      // parse を分離してガードする（破損時は prev を初期値に倒す）。
+      let prev = { count: 0, last: "" };
       try {
         const raw = localStorage.getItem(`${STORE_PREFIX}:streak`);
-        const prev = raw
-          ? (JSON.parse(raw) as { count: number; last: string })
-          : { count: 0, last: "" };
-        if (won) {
-          const y = new Date(Date.parse(p.date + "T00:00:00Z") - 86400000)
-            .toISOString()
-            .slice(0, 10);
-          count = prev.last === y ? prev.count + 1 : 1;
+        if (raw) {
+          const parsed = JSON.parse(raw) as { count?: number; last?: string };
+          prev = { count: parsed.count ?? 0, last: parsed.last ?? "" };
         }
-        const next = { count, last: p.date };
-        localStorage.setItem(`${STORE_PREFIX}:streak`, JSON.stringify(next));
-        setStreak(count);
       } catch {
-        /* noop */
+        /* 破損した streak は初期値で扱う */
       }
-      // 戦績を集計（連勝ロジックとは別 try で隔離）。date で二重集計を防ぐ。
+      let count = 0;
+      if (won) {
+        const y = new Date(Date.parse(p.date + "T00:00:00Z") - 86400000)
+          .toISOString()
+          .slice(0, 10);
+        count = prev.last === y ? prev.count + 1 : 1;
+      }
       try {
-        setStats((prev) => {
-          const nextStats = recordGame(prev, {
-            date: p.date,
-            won,
-            tries,
-            currentStreak: count,
-          });
-          try {
-            localStorage.setItem(
-              `${STORE_PREFIX}:stats`,
-              JSON.stringify(nextStats),
-            );
-          } catch {
-            /* 保存不可でも表示上の戦績は更新する */
-          }
-          return nextStats;
-        });
+        localStorage.setItem(
+          `${STORE_PREFIX}:streak`,
+          JSON.stringify({ count, last: p.date }),
+        );
       } catch {
-        /* 戦績集計失敗は当日のプレイを妨げない */
+        /* 保存不可でも表示上の連勝は更新する */
       }
+      setStreak(count);
+
+      // 戦績は純粋 updater で更新（永続化は stats 変更 effect に分離）。
+      // date で二重集計を防ぐ（recordGame の lastDate ガード）。
+      setStats((prevStats) =>
+        recordGame(prevStats, { date: p.date, won, tries, currentStreak: count }),
+      );
     },
     [],
   );
@@ -200,6 +206,10 @@ export default function Home() {
     }
     setTimeout(() => setCopied(""), 2500);
   }, [puzzle, state]);
+
+  // カウントダウン時計で Home は毎秒再レンダーされる。onClose を安定参照にして
+  // StatsModal のフォーカス/読み上げエフェクトが毎秒張り直されないようにする。
+  const closeStats = useCallback(() => setStatsOpen(false), []);
 
   const lastResult = state.results[state.results.length - 1];
   const triesLeft = MAX_TRIES - state.guesses.length;
@@ -418,7 +428,7 @@ export default function Home() {
           stats={stats}
           streak={streak}
           highlight={won ? state.guesses.length : 0}
-          onClose={() => setStatsOpen(false)}
+          onClose={closeStats}
         />
       )}
     </>

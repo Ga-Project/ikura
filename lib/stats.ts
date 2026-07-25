@@ -2,6 +2,8 @@
 // プレイ数・勝率・最長連勝・「何回で的中したか」の分布を端末内に蓄積する。
 // 商品名や正解価格は一切保持しない（日付キーと集計値のみ）。
 
+// node ネイティブTS（node --test の型ストリップ）は相対 import に明示拡張子を要求するため
+// `.ts` を付ける（tsconfig の allowImportingTsExtensions=true で tsc/next も許容）。
 import { MAX_TRIES } from "./game.ts";
 
 export interface Stats {
@@ -47,9 +49,12 @@ export function normalizeStats(value: unknown): Stats {
   if (Array.isArray(v.dist)) {
     for (let i = 0; i < MAX_TRIES; i++) dist[i] = int(v.dist[i]);
   }
+  // 不変条件を保つ: 勝ち数は総プレイ数を超えない（改ざん/旧データで勝率>100% を防ぐ）。
+  const played = int(v.played);
+  const wins = Math.min(int(v.wins), played);
   return {
-    played: int(v.played),
-    wins: int(v.wins),
+    played,
+    wins,
     maxStreak: int(v.maxStreak),
     dist,
     lastDate: typeof v.lastDate === "string" ? v.lastDate : "",
