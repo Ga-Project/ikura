@@ -18,6 +18,14 @@ import {
   type GuessResult,
   type Puzzle,
 } from "../lib/game";
+import {
+  emptyStats,
+  maxDist,
+  normalizeStats,
+  recordGame,
+  winRate,
+  type Stats,
+} from "../lib/stats";
 
 const SITE_URL = "https://ga-project.github.io/ikura/";
 const STORE_PREFIX = "ikura:v1";
@@ -47,6 +55,8 @@ export default function Home() {
   const [state, setState] = useState<GameState>(initialState);
   const [input, setInput] = useState("");
   const [streak, setStreak] = useState(0);
+  const [stats, setStats] = useState<Stats>(emptyStats);
+  const [statsOpen, setStatsOpen] = useState(false);
   const [copied, setCopied] = useState("");
   const [celebrate, setCelebrate] = useState(false);
   const [now, setNow] = useState(0);
@@ -82,6 +92,13 @@ export default function Home() {
     } catch {
       /* streak 復元失敗は無視 */
     }
+    // 戦績も別 try で隔離（破損しても当日のプレイと他集計を止めない）。
+    try {
+      const raw = localStorage.getItem(`${STORE_PREFIX}:stats`);
+      if (raw) setStats(normalizeStats(JSON.parse(raw)));
+    } catch {
+      /* 戦績復元失敗は無視（空の戦績から始める） */
+    }
   }, []);
 
   // カウントダウン用の時計
@@ -103,28 +120,53 @@ export default function Home() {
     }
   }, []);
 
-  const finalizeStreak = useCallback((p: Puzzle, won: boolean) => {
-    if (finalizedRef.current) return;
-    finalizedRef.current = true;
-    try {
-      const raw = localStorage.getItem(`${STORE_PREFIX}:streak`);
-      const prev = raw
-        ? (JSON.parse(raw) as { count: number; last: string })
-        : { count: 0, last: "" };
+  const finalizeStreak = useCallback(
+    (p: Puzzle, won: boolean, tries: number) => {
+      if (finalizedRef.current) return;
+      finalizedRef.current = true;
       let count = 0;
-      if (won) {
-        const y = new Date(Date.parse(p.date + "T00:00:00Z") - 86400000)
-          .toISOString()
-          .slice(0, 10);
-        count = prev.last === y ? prev.count + 1 : 1;
+      try {
+        const raw = localStorage.getItem(`${STORE_PREFIX}:streak`);
+        const prev = raw
+          ? (JSON.parse(raw) as { count: number; last: string })
+          : { count: 0, last: "" };
+        if (won) {
+          const y = new Date(Date.parse(p.date + "T00:00:00Z") - 86400000)
+            .toISOString()
+            .slice(0, 10);
+          count = prev.last === y ? prev.count + 1 : 1;
+        }
+        const next = { count, last: p.date };
+        localStorage.setItem(`${STORE_PREFIX}:streak`, JSON.stringify(next));
+        setStreak(count);
+      } catch {
+        /* noop */
       }
-      const next = { count, last: p.date };
-      localStorage.setItem(`${STORE_PREFIX}:streak`, JSON.stringify(next));
-      setStreak(count);
-    } catch {
-      /* noop */
-    }
-  }, []);
+      // 戦績を集計（連勝ロジックとは別 try で隔離）。date で二重集計を防ぐ。
+      try {
+        setStats((prev) => {
+          const nextStats = recordGame(prev, {
+            date: p.date,
+            won,
+            tries,
+            currentStreak: count,
+          });
+          try {
+            localStorage.setItem(
+              `${STORE_PREFIX}:stats`,
+              JSON.stringify(nextStats),
+            );
+          } catch {
+            /* 保存不可でも表示上の戦績は更新する */
+          }
+          return nextStats;
+        });
+      } catch {
+        /* 戦績集計失敗は当日のプレイを妨げない */
+      }
+    },
+    [],
+  );
 
   const submit = useCallback(() => {
     if (!puzzle || state.status !== "playing") return;
@@ -135,11 +177,11 @@ export default function Home() {
     setInput("");
     persist(puzzle, next);
     if (next.status === "won") {
-      finalizeStreak(puzzle, true);
+      finalizeStreak(puzzle, true, next.guesses.length);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 1100);
     } else if (next.status === "lost") {
-      finalizeStreak(puzzle, false);
+      finalizeStreak(puzzle, false, next.guesses.length);
     }
   }, [puzzle, state, input, persist, finalizeStreak]);
 
@@ -218,6 +260,14 @@ export default function Home() {
                 🔥<span className="num">{streak}</span>
               </span>
             )}
+            <button
+              className="icon-btn"
+              onClick={() => setStatsOpen(true)}
+              aria-label="戦績を見る"
+              title="戦績"
+            >
+              📊
+            </button>
             <ThemeToggle />
           </div>
         </header>
@@ -298,6 +348,7 @@ export default function Home() {
                   onShare={share}
                   copied={copied}
                   streak={streak}
+                  stats={stats}
                 />
               )}
             </>
@@ -362,6 +413,14 @@ export default function Home() {
         </footer>
       </div>
       {celebrate && <div className="confetti" aria-hidden="true" />}
+      {statsOpen && (
+        <StatsModal
+          stats={stats}
+          streak={streak}
+          highlight={won ? state.guesses.length : 0}
+          onClose={() => setStatsOpen(false)}
+        />
+      )}
     </>
   );
 }
@@ -405,12 +464,14 @@ function ResultPanel({
   onShare,
   copied,
   streak,
+  stats,
 }: {
   state: GameState;
   won: boolean;
   onShare: () => void;
   copied: string;
   streak: number;
+  stats: Stats;
 }) {
   return (
     <section className="result" aria-live="polite">
@@ -441,16 +502,11 @@ function ResultPanel({
         </div>
       </div>
 
-      <div className="stats">
-        <div className="stat">
-          <b className="num">{state.guesses.length}</b>
-          <span>計測回数</span>
-        </div>
-        <div className="stat">
-          <b className="num">{streak}</b>
-          <span>連勝</span>
-        </div>
-      </div>
+      <StatsView
+        stats={stats}
+        streak={streak}
+        highlight={won ? state.guesses.length : 0}
+      />
 
       <div className="share-actions">
         <button className="btn btn-primary" onClick={onShare}>
@@ -461,6 +517,142 @@ function ResultPanel({
         {copied}
       </p>
     </section>
+  );
+}
+
+// 戦績ビュー：集計サマリ（プレイ/勝率/現在の連勝/最長連勝）＋的中回数の分布ヒストグラム。
+// highlight>0 のとき、その回数のバーを「今日の結果」として強調する。
+function StatsView({
+  stats,
+  streak,
+  highlight,
+}: {
+  stats: Stats;
+  streak: number;
+  highlight: number;
+}) {
+  const rate = winRate(stats);
+  const top = maxDist(stats);
+  const hasWins = stats.wins > 0;
+  return (
+    <div className="statsview">
+      <dl className="statgrid">
+        <div className="statcell">
+          <dd className="statnum num">{stats.played}</dd>
+          <dt>プレイ</dt>
+        </div>
+        <div className="statcell">
+          <dd className="statnum num">
+            {rate}
+            <span className="statunit">%</span>
+          </dd>
+          <dt>勝率</dt>
+        </div>
+        <div className="statcell">
+          <dd className="statnum num">{streak}</dd>
+          <dt>現在の連勝</dt>
+        </div>
+        <div className="statcell">
+          <dd className="statnum num">{stats.maxStreak}</dd>
+          <dt>最長連勝</dt>
+        </div>
+      </dl>
+
+      <p className="dist-head">的中までの回数</p>
+      {hasWins ? (
+        <ol className="dist">
+          {stats.dist.map((c, i) => {
+            const n = i + 1;
+            const hi = highlight === n;
+            const w = c > 0 ? Math.max(8, Math.round((c / top) * 100)) : 0;
+            return (
+              <li className={`dist-row${hi ? " hi" : ""}`} key={n}>
+                <span className="dist-label num" aria-hidden="true">
+                  {n}
+                </span>
+                <span className="dist-track">
+                  <span className="dist-fill" style={{ width: `${w}%` }} />
+                </span>
+                <span className="dist-count num">
+                  <span className="visually-hidden">{n}回で的中：</span>
+                  {c}
+                  {hi && <span className="dist-you"> ← 今日</span>}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      ) : (
+        <p className="dist-empty">
+          まだ的中の記録はありません。今日の1問から積み上げよう。
+        </p>
+      )}
+    </div>
+  );
+}
+
+// 戦績モーダル：いつでも呼べる戦績表示。Escape / 背景クリック / ✕ で閉じる。
+function StatsModal({
+  stats,
+  streak,
+  highlight,
+  onClose,
+}: {
+  stats: Stats;
+  streak: number;
+  highlight: number;
+  onClose: () => void;
+}) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const prevFocus = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      // 唯一のフォーカス可能要素（閉じるボタン）に閉じ込める簡易トラップ。
+      if (e.key === "Tab") {
+        e.preventDefault();
+        closeRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      prevFocus?.focus?.();
+    };
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stats-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-head">
+          <h2 id="stats-title" className="modal-title">
+            戦績
+          </h2>
+          <button
+            ref={closeRef}
+            className="icon-btn"
+            onClick={onClose}
+            aria-label="閉じる"
+            title="閉じる"
+          >
+            ✕
+          </button>
+        </div>
+        <StatsView stats={stats} streak={streak} highlight={highlight} />
+        <p className="modal-note">
+          戦績はこの端末内だけに保存され、外部には送信されません。
+        </p>
+      </div>
+    </div>
   );
 }
 

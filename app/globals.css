@@ -819,3 +819,177 @@ a {
     box-shadow: none;
   }
 }
+
+/* ===== 戦績（統計）— サマリグリッド＋的中回数ヒストグラム ===== */
+.statsview {
+  margin-top: var(--space-4);
+  text-align: left;
+}
+.statgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+}
+.statcell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.statnum {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.statunit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 1px;
+}
+.statcell dt {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: center;
+}
+.dist-head {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+  letter-spacing: 0.02em;
+}
+.dist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dist-row {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dist-label {
+  text-align: center;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.dist-track {
+  height: 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.dist-fill {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    var(--accent-bright)
+  );
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dist-row.hi .dist-fill {
+  background: linear-gradient(
+    90deg,
+    var(--sem-correct),
+    color-mix(in oklab, var(--sem-correct) 70%, white)
+  );
+}
+.dist-count {
+  min-width: 3.5rem;
+  text-align: right;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.dist-row.hi .dist-count {
+  color: var(--sem-correct-fg);
+}
+.dist-you {
+  font-weight: 700;
+  color: var(--sem-correct-fg);
+}
+.dist-empty {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  text-align: center;
+  padding: var(--space-4) 0 var(--space-2);
+}
+
+/* ===== 戦績モーダル ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: hsl(200 30% 10% / 0.55);
+  backdrop-filter: blur(2px);
+  animation: modal-in 0.18s ease-out;
+}
+.modal {
+  width: min(28rem, 100%);
+  max-height: calc(100dvh - 2 * var(--space-4));
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-5);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.modal-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.modal-note {
+  margin: var(--space-5) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: center;
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dist-fill {
+    transition: none;
+  }
+  .modal-backdrop {
+    animation: none;
+  }
+}
