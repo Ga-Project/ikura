@@ -7,6 +7,9 @@ const SITE_URL = "https://ga-project.github.io/ikura/";
 const TITLE = "イクラ？ — 今日の平均価格、当てられる？";
 const DESC =
   "身近な商品・サービスの全国平均価格を当てる、1日1問の無料デイリーゲーム。上げて・下げての手ごたえで寄せて、結果を絵文字で共有しよう。";
+// OGP/Twitter カード画像（1200×630・静的書き出し）。GitHub Pages のプロジェクトパス
+// 配下に置くため、metadataBase 相対解決の曖昧さを避けて絶対URLで指定する。
+const OG_IMAGE = `${SITE_URL}og.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,11 +23,20 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     siteName: "イクラ？",
     url: SITE_URL,
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "イクラ？ — 今日の平均価格、当てられる？ 1日1問の無料デイリー価格当てゲーム",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESC,
+    images: [OG_IMAGE],
   },
 };
 

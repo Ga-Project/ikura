@@ -1,0 +1,108 @@
+<!doctype html>
+<!--
+  イクラ？ OGP カード原版 (1200×630)。
+  このHTMLを headless Chrome で 1200×630 スクショして public/og.png を生成する
+  （scripts/generate-og.mjs）。デザインは製品「ねだんゲージ」の配色・収束スケール🎯モチーフに準拠。
+-->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root {
+        --bg0: hsl(200 26% 8%);
+        --bg1: hsl(188 40% 13%);
+        --accent: hsl(181 72% 55%);
+        --accent-soft: hsl(183 60% 42%);
+        --gold: hsl(44 92% 60%);
+        --text: hsl(190 22% 95%);
+        --muted: hsl(196 16% 70%);
+        --border: hsl(195 30% 26%);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+        background:
+          radial-gradient(1100px 700px at 82% -8%, hsl(181 70% 22% / 0.55), transparent 60%),
+          radial-gradient(900px 600px at 4% 108%, hsl(188 60% 18% / 0.5), transparent 62%),
+          linear-gradient(150deg, var(--bg0), var(--bg1));
+        color: var(--text);
+        position: relative;
+        overflow: hidden;
+      }
+      /* 目盛りの世界観：うっすら計測グリッド */
+      .ticks {
+        position: absolute; inset: 0;
+        background-image: repeating-linear-gradient(90deg, hsl(190 30% 60% / 0.05) 0 1px, transparent 1px 60px);
+        mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+      }
+      .frame { position: absolute; inset: 44px; border: 1px solid var(--border); border-radius: 28px; }
+      .wrap { position: absolute; inset: 44px; padding: 46px 76px; display: flex; flex-direction: column; justify-content: space-between; }
+
+      .top { display: flex; align-items: center; gap: 20px; }
+      .badge {
+        font-size: 25px; font-weight: 800; letter-spacing: 0.06em;
+        color: var(--bg0); background: var(--accent);
+        padding: 9px 22px; border-radius: 999px;
+      }
+      .badge.ghost { background: transparent; color: var(--accent); border: 2px solid var(--accent-soft); }
+
+      .title { font-size: 112px; font-weight: 900; letter-spacing: 0.01em; line-height: 0.98; margin-top: 16px; }
+      .title .q { color: var(--accent); }
+      .yen { color: var(--gold); font-weight: 900; }
+      .lede { font-size: 37px; font-weight: 700; color: var(--text); margin-top: 16px; }
+      .sub { font-size: 25px; color: hsl(196 16% 78%); font-weight: 500; margin-top: 10px; letter-spacing: 0.01em; }
+
+      /* 収束スケール（ゲームの共有署名） */
+      .scale { margin-top: 16px; }
+      .axis { font-size: 30px; font-weight: 800; color: var(--muted); letter-spacing: 0.12em; display: flex; align-items: center; gap: 14px; }
+      .axis .aim { color: var(--gold); font-size: 36px; }
+      .grid { display: flex; gap: 12px; margin-top: 14px; }
+      .cell {
+        width: 60px; height: 60px; border-radius: 14px;
+        background: hsl(195 24% 16%); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center; font-size: 33px;
+      }
+      .cell.mk { background: hsl(200 55% 30%); border-color: hsl(200 60% 44%); }
+      .cell.hit { background: hsl(44 70% 30%); border-color: var(--gold); }
+
+      .foot { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 20px; }
+      .url { font-size: 30px; font-weight: 800; color: var(--accent); letter-spacing: 0.02em; }
+      .by { font-size: 24px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="ticks"></div>
+    <div class="frame"></div>
+    <div class="wrap">
+      <div>
+        <div class="top">
+          <span class="badge">1日1問・無料</span>
+          <span class="badge ghost">絵文字で結果シェア</span>
+        </div>
+        <div class="title">イク<span class="yen">ラ</span><span class="q">？</span></div>
+        <div class="lede">今日の平均価格、当てられる？</div>
+        <div class="sub">身近な商品の全国平均価格を、上げて下げての手ごたえで当てる。</div>
+      </div>
+
+      <div class="scale">
+        <div class="axis">低い&nbsp;◀━<span class="aim">🎯</span>━▶&nbsp;高い</div>
+        <!-- タイル自身が色を持つ（アプリの .scale-grid と同じ流儀）。絵文字はターゲット🎯のみ。 -->
+        <div class="grid">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell mk"></div>
+          <div class="cell"></div>
+          <div class="cell hit">🎯</div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <div class="url">ga-project.github.io/ikura</div>
+        <div class="by">Ga Project</div>
+      </div>
+    </div>
+  </body>
+</html>
