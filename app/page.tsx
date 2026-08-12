@@ -26,8 +26,10 @@ import {
   winRate,
   type Stats,
 } from "../lib/stats";
+// 共有テキスト末尾に載る URL。全共有投稿に載る＝この製品で最も重要な URL なので、
+// canonical / sitemap と同じ出所から取る。
+import { SITE_URL } from "../lib/site.mjs";
 
-const SITE_URL = "https://ga-project.github.io/ikura/";
 const STORE_PREFIX = "ikura:v1";
 
 function todayISOLocal(): string {

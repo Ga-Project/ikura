@@ -39,9 +39,13 @@ jobs:
         run: gitleaks detect --no-banner --redact
 
   build:
-    name: Build (static export)
+    name: Build & verify (static export)
     needs: secret-scan # スキャン通過が前提。fail 時は skip され公開されない。
     runs-on: ubuntu-latest
+    env:
+      # プロジェクトページ（<owner>.github.io/ikura/）へサブパス配信するため basePath を注入。
+      # ルート配信（ユーザー/組織ページ・カスタムドメイン）に切り替える場合はこの env を外す。
+      NEXT_PUBLIC_BASE_PATH: /ikura
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -50,11 +54,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # プロジェクトページ（<owner>.github.io/ikura/）へサブパス配信するため basePath を注入。
-      # ルート配信（ユーザー/組織ページ・カスタムドメイン）に切り替える場合はこの env を外す。
+      - run: pnpm lint
+      - run: pnpm typecheck
       - run: pnpm build
-        env:
-          NEXT_PUBLIC_BASE_PATH: /ikura
+      # 検査は upload の直前に、公開されるのと同一の out/ に対して行う。
+      # 別 job に切ると検査対象が「デプロイされる成果物」ではなく再ビルドの複製になり、
+      # 保証が弱くなるうえフルビルドが2回走る。
+      - run: pnpm test
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

@@ -1,9 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { absoluteUrl, OG_IMAGE } from "../../lib/site.mjs";
+
+const TITLE = "プライバシー・出典・免責 — イクラ？";
+const DESC = "イクラ？のプライバシーポリシー、価格データの出典、免責事項。";
+const PAGE_URL = absoluteUrl("/privacy");
 
 export const metadata: Metadata = {
-  title: "プライバシー・出典・免責 — イクラ？",
-  description: "イクラ？のプライバシーポリシー、価格データの出典、免責事項。",
+  title: TITLE,
+  description: DESC,
+  alternates: { canonical: PAGE_URL },
+  // openGraph / twitter はいずれも親 layout から「最上位キー単位で」浅くマージされる。
+  // ＝ここで定義すると親の同キーを丸ごと置き換え、定義しなければ親の値がそのまま残る。
+  // 画像はトップと共通のまま、文言と URL だけこのページを名乗らせる。
+  openGraph: {
+    title: TITLE,
+    description: DESC,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "イクラ？",
+    url: PAGE_URL,
+    images: [OG_IMAGE],
+  },
+  // twitter を省くと親（ゲーム本体）の title/description が残り、X 上ではこちらが
+  // og より優先されるため、法務ページなのにゲームのカードが出る。og と必ず対で書く。
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESC,
+    images: [{ url: OG_IMAGE.url, alt: OG_IMAGE.alt }],
+  },
 };
 
 export default function Privacy() {

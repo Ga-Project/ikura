@@ -3,6 +3,10 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "ページが見つかりません — イクラ？",
+  // 親 layout の canonical（トップURL）を継がせない。継ぐと 404 が
+  // 「トップの別URL版」を名乗り、正規化を汚す。
+  alternates: { canonical: null },
+  robots: { index: false, follow: false },
 };
 
 export default function NotFound() {

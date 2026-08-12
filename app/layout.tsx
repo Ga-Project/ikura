@@ -2,41 +2,36 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./theme.css";
+import { SITE_URL, absoluteUrl, OG_IMAGE } from "../lib/site.mjs";
 
-const SITE_URL = "https://ga-project.github.io/ikura/";
 const TITLE = "イクラ？ — 今日の平均価格、当てられる？";
 const DESC =
   "身近な商品・サービスの全国平均価格を当てる、1日1問の無料デイリーゲーム。上げて・下げての手ごたえで寄せて、結果を絵文字で共有しよう。";
-// OGP/Twitter カード画像（1200×630・静的書き出し）。GitHub Pages のプロジェクトパス
-// 配下に置くため、metadataBase 相対解決の曖昧さを避けて絶対URLで指定する。
-const OG_IMAGE = `${SITE_URL}og.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESC,
   applicationName: "イクラ？",
+  // canonical を明示しないと、サブパス配信では末尾スラッシュ有無・パラメータ付きの
+  // 共有 URL が別ページとして扱われ、評価が分散する。sitemap と同じ出所から組む。
+  alternates: { canonical: absoluteUrl("/") },
   openGraph: {
     title: TITLE,
     description: DESC,
     type: "website",
     locale: "ja_JP",
     siteName: "イクラ？",
-    url: SITE_URL,
-    images: [
-      {
-        url: OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: "イクラ？ — 今日の平均価格、当てられる？ 1日1問の無料デイリー価格当てゲーム",
-      },
-    ],
+    url: absoluteUrl("/"),
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESC,
-    images: [OG_IMAGE],
+    // 文字列でなく記述子で渡す。文字列だと twitter:image:alt が出ず、
+    // X（＝この製品の主要な共有面）で画像に代替テキストが無い状態になる。
+    images: [{ url: OG_IMAGE.url, alt: OG_IMAGE.alt }],
   },
 };
 
