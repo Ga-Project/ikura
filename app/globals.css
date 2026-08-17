@@ -73,6 +73,13 @@ a {
   --radius-lg: 22px;
   --radius-pill: 999px;
 
+  /* sticky な .masthead の高さ。内訳は padding(--space-3)×2 + 行の高さ 40px
+   * + border-bottom 1px。.masthead に min-height として与えて実測値と一致させ、
+   * その下に潜り込ませたくない要素（アンカー先の見出し・表のヘッダ行）が
+   * ここ1箇所から余白を導出できるようにする。個別にハードコードすると
+   * ヘッダーを触ったときに片方だけ腐る。 */
+  --masthead-h: 65px;
+
   /* light */
   --bg: hsl(190 30% 97%);
   --surface: hsl(0 0% 100%);
@@ -223,6 +230,9 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  /* --masthead-h を「実測を写した値」でなく実際の高さの根拠にする。
+   * これが無いと中身の変更で高さが動き、これを参照している側だけがずれる。 */
+  min-height: var(--masthead-h);
   padding: var(--space-3) var(--space-4);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(8px);
@@ -733,6 +743,217 @@ a {
 }
 .foot a {
   color: var(--accent);
+}
+
+/* ===== 資料ページ（/prices/ 平均価格一覧）=====
+ * ゲーム本体は「1問に集中させる」ため 520px の縦一列だが、資料ページは
+ * 3列の表を読ませるので窮屈になる。同じ .app を土台に、幅と下余白だけを上書きする。
+ * ゲーム側の固定ドックはこのページに無いので、140px の逃げも打ち消す。
+ *
+ * /privacy/ はまだ .app のまま（インラインスタイルで個別に調整している）。
+ * ここに寄せる価値はあるが本改修の範囲外なので、このブロックは /prices/ だけを
+ * 名乗る。適用していないページをコメントで名乗らないこと。 */
+.app-doc {
+  max-width: 760px;
+  padding-bottom: var(--space-6);
+}
+/* .foot は 520px 固定（ゲーム幅）。760px の資料ページでは本文より 208px 短い
+ * 罫線が中央に浮くので、親の幅に従わせる。
+ *
+ * margin-inline: 0 が本体で、max-width: none は単独では効かない。資料ページの
+ * footer は contentinfo ランドマークのため main の外＝.app（flex column）の
+ * 直接の子で、交差軸に auto マージンがあると stretch が無効になり fit-content 幅に
+ * なる。上限だけ外すと「最長の一文の幅」で罫線が決まり、文章を1文字直すたびに
+ * 幅が動く（実測 486.8px・本文728pxに対し左右136.6px内寄り）。 */
+.app-doc .foot {
+  max-width: none;
+  margin-inline: 0;
+}
+
+/* masthead の「戻る」。.btn は入力ドック用に flex:1 で伸びるので、
+ * ヘッダーに置くと横幅を食い尽くす。ここだけ内容幅に戻す。 */
+.btn-nav {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--fs-label);
+  text-decoration: none;
+}
+.btn-nav:hover {
+  background: var(--surface-2);
+}
+
+.doc-title {
+  margin-top: var(--space-5);
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+.doc-lead {
+  margin-top: var(--space-4);
+  color: var(--text-muted);
+}
+.doc-section {
+  margin-top: var(--space-7);
+}
+.doc-h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  /* sticky masthead の下に潜り込ませない（アンカーで飛んだ先が隠れる）。 */
+  scroll-margin-top: calc(var(--masthead-h) + var(--space-2));
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--accent-weak);
+  font-size: var(--fs-title);
+}
+.doc-h2-count {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.doc-body {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+}
+.doc-cta {
+  margin-top: var(--space-7);
+  display: flex;
+}
+.doc-cta .btn {
+  /* .btn は入力ドック用に flex: 1。打ち消さないと 760px 幅のボタンになる。 */
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-6);
+  text-decoration: none;
+}
+/* リード直下の導線。検索から来た人がファーストビューでゲームへ行ける唯一の場所。 */
+.doc-kicker {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--accent-weak);
+  font-size: var(--fs-label);
+}
+.doc-kicker a {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.doc-hint {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+}
+
+/* カテゴリ目次 */
+.jump {
+  margin-top: var(--space-5);
+  padding: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.jump ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jump a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* タップ領域は製品内の他要素（.icon-btn 40 / .btn 48）に合わせて 40px。 */
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  text-decoration: none;
+}
+.jump a:hover {
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+.jump-count {
+  color: var(--text-muted);
+  font-family: var(--font-num);
+  font-size: var(--fs-caption);
+}
+
+/* 価格表 */
+.table-wrap {
+  margin-top: var(--space-4);
+  /* ここに overflow-x: auto を置かないこと。CSS の overflow 仕様で他方の軸の
+   * visible が auto に格上げされ、この要素が縦のスクロールコンテナになる。
+   * すると thead の sticky はビューポートでなくこの箱を基準に解決され、
+   * 箱に高さ制約が無い＝縦スクロールが起きないため、見出し行は永久に固定されない
+   * （実機で確認: overflow を外した瞬間に thead が -593px → 56px に復帰した）。
+   * 横あふれ対策としても不要で、320px でも実データは全表 clientWidth に収まる
+   * （長い品目名は3行に折り返す）。 */
+}
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-label);
+}
+.price-table th,
+.price-table td {
+  padding: var(--space-3) var(--space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.price-table thead th {
+  /* 51行スクロールする間、右端の数値が何なのか分からなくならないよう固定する。
+   * 基準は sticky な masthead の下端（.table-wrap を非スクロールに保つのが前提）。 */
+  position: sticky;
+  top: var(--masthead-h);
+  z-index: 1;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.price-table tbody th {
+  font-weight: 600;
+}
+/* 51行を横に読み違えないための地の縞。hover は light では --surface が
+ * 地色とほぼ同じで見えないため、両テーマで差の出る --accent-weak を使う。
+ * 縞に --surface でなく --surface-2 を使うのは、light の --bg↔--surface が
+ * ΔE*ab 2.77 でほぼ見分けられないため（dark は 5.22 で足りている）。 */
+.price-table tbody tr:nth-child(even) {
+  background: var(--surface-2);
+}
+.price-table tbody tr:hover {
+  background: var(--accent-weak);
+}
+/* 単位は折り返さない。日本語は文字間のほぼ全てで改行できるため、外すと
+ * 320px で「60分」が「60」「分」に割れ、数値が単位から分断される（実測6セル）。
+ *
+ * 長い単位を1件足すとページ全体が横スクロールしうる、という懸念はここでは扱わない。
+ * レイアウト時点では「長すぎる単位」と「短い単位」を区別できず、防ごうとすると
+ * 全113行を巻き添えにするため。長さの制約はデータの制約なので、
+ * test/prices.test.mjs が単位の長さの上限を検査して CI で止める。 */
+.price-table .col-unit {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.price-table .col-price {
+  text-align: right;
+  white-space: nowrap;
+}
+/* 等幅・tabular は共通の .num が持つ。ここは強調だけ足す。 */
+.price-table td.num {
+  font-weight: 700;
 }
 
 /* ===== animations ===== */

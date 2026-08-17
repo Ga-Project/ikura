@@ -22,6 +22,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: absoluteUrl("/prices"),
+      // 全品目の平均価格一覧。この製品で唯一「本文」を持つページで、
+      // 「〇〇 平均価格」の長尾検索を受けるのはトップでなくここ。
+      // 更新は items.json を足したときだけ。
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: absoluteUrl("/privacy"),
       // 価格データの出典・免責を載せた静的ページ。更新は稀。
       changeFrequency: "yearly",

@@ -19,6 +19,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { SITE_URL, absoluteUrl, OG_IMAGE } from "../lib/site.mjs";
+import { formatYen, groupByCategory } from "../lib/prices.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(__dirname, "../out");
@@ -163,6 +164,140 @@ test("og と twitter が同じページを名乗っている", { skip }, () => {
       `twitter:image:alt が無い/食い違う（route=${route}）`,
     );
   }
+});
+
+// --- /prices/ の本文が実在することの検査 -------------------------------------
+//
+// 背景（実害）: トップは出題も価格も全てクライアント描画で、静的 HTML の本文は
+// 実測 166 文字しか無かった。sitemap に載せても中身が空なので順位が付かない。
+// /prices/ はその本文を作るためだけに存在する。
+//
+// なぜ meta の検査では足りないか: 上の検査は canonical/og/sitemap の整合しか見ない。
+// 後日「カテゴリ絞り込み」等で app/prices/page.tsx に "use client" が付き、表が
+// クライアント描画に変わると、本文は殻に戻るのに型検査も lint も既存テストも
+// 全て緑のまま通る（＝この変更が直した欠陥が無言で再発する）。成果物を読んで止める。
+const PRICES = resolve(OUT, "prices/index.html");
+const itemsData = JSON.parse(
+  readFileSync(resolve(__dirname, "../data/items.json"), "utf8"),
+);
+
+/** タグ・script・style を落とした本文テキスト。 */
+function bodyText(html) {
+  const stripped = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "");
+  const body = stripped.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? stripped;
+  return body
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;|&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** HTML の実体参照を戻す（品目名・単位の突合に使う最小限）。 */
+function decode(s) {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(?:39|x27);/g, "'")
+    .replace(/<!--.*?-->/g, "");
+}
+
+test("/prices/ の表が行ごとに実データと一致する", { skip }, () => {
+  // ページ全体に対する includes で価格を見ても、ほぼ何も検出できない。
+  // 価格文字列は重複するため（250円 は6品目、300円 も6品目）、1行の価格を
+  // 消しても他の行の同じ文字列で includes が満たされる。実測では 113件中 99件が
+  // その状態で、単一セルの欠落・値の改変・行のずれが全て素通りしていた。
+  // 行タプルで突合すれば、それらが全て落ちる。
+  const html = readFileSync(PRICES, "utf8");
+  const rows = [...html.matchAll(/<tr>((?:(?!<\/tr>)[\s\S])*)<\/tr>/g)]
+    .map((m) =>
+      [...m[1].matchAll(/<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/g)].map((c) =>
+        decode(c[1].replace(/<[^>]+>/g, "")).trim(),
+      ),
+    )
+    .filter((cells) => cells.length === 3);
+
+  const expected = groupByCategory(itemsData.items).flatMap((g) =>
+    g.items.map((i) => [i.name, i.unit, formatYen(i.price)]),
+  );
+  // 先頭はヘッダ行（品目/単位/平均価格）。カテゴリごとに1本ずつ入る。
+  const body = rows.filter((cells) => cells[0] !== "品目");
+
+  assert.deepEqual(
+    body,
+    expected,
+    "静的HTMLの表が実データと行単位で一致しない（欠落・改変・並び順のずれ）",
+  );
+});
+
+test("/prices/ の本文が索引に足る量を保っている", { skip }, () => {
+  const text = bodyText(readFileSync(PRICES, "utf8"));
+  // 現状 2,900 文字超。下限は「表が丸ごと消えたら必ず割る」水準に置く。
+  assert.ok(
+    text.length >= 2000,
+    `/prices/ の本文が ${text.length} 文字しかない（表が描画されていない疑い）`,
+  );
+});
+
+test("/prices/ の見出し id が目次の飛び先と一致する", { skip }, () => {
+  const html = readFileSync(PRICES, "utf8");
+  const headingIds = [...html.matchAll(/<h2[^>]+id="([^"]+)"/g)].map((m) => m[1]);
+  const expected = groupByCategory(itemsData.items).map((g) => g.slug);
+  assert.deepEqual(headingIds, expected, "h2 の id とカテゴリの slug が食い違う");
+  // 目次のリンク先が実在する id を指しているか（アンカーの空振りを止める）。
+  for (const id of expected) {
+    assert.ok(
+      html.includes(`href="#${id}"`),
+      `目次に #${id} へのリンクが無い`,
+    );
+  }
+});
+
+// 免責文言は3ページに手書きで散っている（ゲームのフッター／/prices/／/privacy/）。
+// 正本を1つにする改修は別途だが、それまでのドリフトはここで止める。
+// 実害: 価格を更新したとき /prices/ の文だけ直り、他の2ページが古い表現のまま残る。
+const DISCLAIMER_CORE = "統計の公表値そのものではありません";
+
+test("公開する全ページが同じ強度の留保を持っている", { skip }, () => {
+  for (const { route, html } of INDEXABLE) {
+    const text = bodyText(readFileSync(html, "utf8"));
+    assert.ok(
+      text.includes(DISCLAIMER_CORE),
+      `${route} に「${DISCLAIMER_CORE}」が無い（免責文言がドリフトした）`,
+    );
+  }
+});
+
+test("一人法人が「編集部」を名乗っていない", { skip }, () => {
+  // 実在しない編集部を、最も正確であるべき出典・免責の文脈で名乗らない。
+  for (const { route, html } of ROUTES) {
+    assert.ok(
+      !readFileSync(html, "utf8").includes("編集部"),
+      `${route} に「編集部」が残っている`,
+    );
+  }
+});
+
+test("トップから /prices/ への内部リンクが静的HTMLに残っている", { skip }, () => {
+  // /prices/ は検索流入だけが存在理由で、内部リンクはトップからのこの1本しかない。
+  // フッターを整理した誰かがこの段落を畳むと、リンクは sitemap だけになり、
+  // 最も内部リンクを集めるページからの受け渡しが消える。
+  // 「隠さずに静的HTMLへ残す」という判断そのものをここで固定する。
+  // basePath の有無はここでは問わない。それは「アセットが basePath を失っていない」
+  // 検査の担当で、2つの不変条件を1つの式に混ぜると、検査結果が成果物でなく
+  // 「テストを実行したときの env」で決まってしまう（Pages 向けにビルドしたあと
+  // 素の pnpm test を打つ、という最も普通の手順で、リンクは実在するのに
+  // 「孤立した」と嘘の警告が出る）。ここが固定するのは
+  // 「トップから /prices/ へのリンクを静的HTMLに残す」という判断だけ。
+  const top = readFileSync(resolve(OUT, "index.html"), "utf8");
+  assert.match(
+    top,
+    /href="[^"]*\/prices\/"/,
+    "トップに /prices/ へのリンクが無い（/prices/ が内部リンクから孤立した）",
+  );
 });
 
 test("サブパス配信でアセットが basePath を失っていない", { skip }, () => {
