@@ -259,11 +259,29 @@ test("/prices/ の見出し id が目次の飛び先と一致する", { skip }, 
 // 免責文言は3ページに手書きで散っている（ゲームのフッター／/prices/／/privacy/）。
 // 正本を1つにする改修は別途だが、それまでのドリフトはここで止める。
 // 実害: 価格を更新したとき /prices/ の文だけ直り、他の2ページが古い表現のまま残る。
+//
+// 対象は「価格を提示しているページ」に限り、INDEXABLE 全件には課さない。
+// 全件に課すと、価格と無関係なページ（説明・遊び方など）を1枚足しただけで、
+// そのページには不要な免責文を書き写さない限り CI が落ちる。ドリフト検査が
+// 新ページの追加を妨げる関門に化けるのは、この検査の目的ではない。
+//
+// 代わりにルートを名指しし、名指ししたルートがビルド出力に実在することも検査する。
+// 名指しだけだと、ページを改名・削除したときにループが 0 件を回って
+// 「緑のまま検査が消える」（この製品で一度起きている失敗のしかた）。
 const DISCLAIMER_CORE = "統計の公表値そのものではありません";
+// discoverRoutes が返す形（末尾スラッシュなし）で書く。価格を提示するページを
+// 増やしたら、ここにも足すこと。
+const DISCLAIMER_ROUTES = ["/", "/prices", "/privacy"];
 
-test("公開する全ページが同じ強度の留保を持っている", { skip }, () => {
-  for (const { route, html } of INDEXABLE) {
-    const text = bodyText(readFileSync(html, "utf8"));
+test("価格を提示する全ページが同じ強度の留保を持っている", { skip }, () => {
+  const fileOf = new Map(INDEXABLE.map((r) => [r.route, r.html]));
+  for (const route of DISCLAIMER_ROUTES) {
+    const file = fileOf.get(route);
+    assert.ok(
+      file,
+      `${route} がビルド出力に無い（改名・削除したなら DISCLAIMER_ROUTES も直すこと）`,
+    );
+    const text = bodyText(readFileSync(file, "utf8"));
     assert.ok(
       text.includes(DISCLAIMER_CORE),
       `${route} に「${DISCLAIMER_CORE}」が無い（免責文言がドリフトした）`,
